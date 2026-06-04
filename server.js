@@ -33,13 +33,8 @@ const MODEL_MAPPING = {
   'deepseek-v4-pro': 'deepseek-ai/deepseek-v4-pro'      // ✅ Direct alias
 };
 
-// Handle bare /v1 path that some clients hit
-app.get('/v1', (req, res) => {
-  res.json({ status: 'ok', message: 'OpenAI NIM Proxy v1 endpoint ready' });
-});
-
-// Health check endpoint
-app.get('/health', (req, res) => {
+// Health check - handle both /health and /v1/health
+app.get(['/health', '/v1/health', '/v1'], (req, res) => {
   res.json({ 
     status: 'ok', 
     service: 'OpenAI to NVIDIA NIM Proxy', 
@@ -48,8 +43,13 @@ app.get('/health', (req, res) => {
   });
 });
 
-// List models endpoint (OpenAI compatible)
-app.get('/v1/models', (req, res) => {
+// Root path handler
+app.get('/', (req, res) => {
+  res.json({ status: 'ok', service: 'OpenAI to NVIDIA NIM Proxy' });
+});
+
+// List models endpoint - handle both /models and /v1/models
+app.get(['/v1/models', '/models'], (req, res) => {
   const models = Object.keys(MODEL_MAPPING).map(model => ({
     id: model,
     object: 'model',
@@ -64,7 +64,7 @@ app.get('/v1/models', (req, res) => {
 });
 
 // Chat completions endpoint (main proxy)
-app.post('/v1/chat/completions', async (req, res) => {
+app.post(['/v1/chat/completions', '/chat/completions'], async (req, res) => {
   try {
     const { model, messages, temperature, max_tokens, stream } = req.body;
     
