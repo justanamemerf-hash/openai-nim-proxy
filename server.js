@@ -33,6 +33,11 @@ const MODEL_MAPPING = {
   'deepseek-v4-pro': 'deepseek-ai/deepseek-v4-pro'      // ✅ Direct alias
 };
 
+// Handle bare /v1 path that some clients hit
+app.get('/v1', (req, res) => {
+  res.json({ status: 'ok', message: 'OpenAI NIM Proxy v1 endpoint ready' });
+});
+
 // Health check endpoint
 app.get('/health', (req, res) => {
   res.json({ 
